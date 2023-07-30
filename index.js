@@ -31,6 +31,22 @@ async function run() {
     const classesCollection = client
       .db("A12-karate-camp")
       .collection("classes");
+    const usersCollection = client.db("A12-karate-camp").collection("users");
+
+    // users related apis
+    app.get("/users", async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    });
+
+    // instructor apis
 
     app.get("/instructors", async (req, res) => {
       const cursor = instructorCollection.find();

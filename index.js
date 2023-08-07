@@ -57,6 +57,7 @@ async function run() {
       .db("A12-karate-camp")
       .collection("classes");
     const usersCollection = client.db("A12-karate-camp").collection("users");
+    const cartCollection = client.db("bistroDb").collection("carts");
 
     // jwt token
 
@@ -84,7 +85,7 @@ async function run() {
     // security layer: verifyJWT
     // email same
     // check admin
-    app.get("/users/admin/:email", verifyJWT, async (req, res) => {
+    app.get("/users/admin/:email", async (req, res) => {
       const email = req.params.email;
 
       if (req.decoded.email !== email) {
@@ -97,7 +98,7 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/users/admin/:id", verifyJWT, async (req, res) => {
+    app.patch("/users/admin/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -124,6 +125,39 @@ async function run() {
       res.send(result);
     });
 
+    // cart collection apis
+    app.get("/carts", async (req, res) => {
+      const email = req.query.email;
+
+      if (!email) {
+        res.send([]);
+      }
+
+      const decodedEmail = req.decoded.email;
+      if (email !== decodedEmail) {
+        return res
+          .status(403)
+          .send({ error: true, message: "forbidden access" });
+      }
+
+      const query = { email: email };
+      const result = await cartCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.post("/carts", async (req, res) => {
+      const item = req.body;
+      const result = await cartCollection.insertOne(item);
+      res.send(result);
+    });
+
+    app.delete("/carts/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await cartCollection.deleteOne(query);
+      res.send(result);
+    });
+
     // create payment intent
     app.post("/create-payment-intent", async (req, res) => {
       const { price } = req.body;
@@ -139,7 +173,7 @@ async function run() {
     });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You are successfully connected to MongoDB!"
     );

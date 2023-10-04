@@ -57,7 +57,7 @@ async function run() {
       .db("A12-karate-camp")
       .collection("classes");
     const usersCollection = client.db("A12-karate-camp").collection("users");
-    const cartCollection = client.db("bistroDb").collection("carts");
+    const cartCollection = client.db("A12-karate-camp").collection("carts");
 
     // jwt token
 

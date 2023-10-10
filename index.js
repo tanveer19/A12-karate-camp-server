@@ -78,6 +78,12 @@ async function run() {
 
     app.post("/users", async (req, res) => {
       const user = req.body;
+      console.log(user);
+      const query = { email: user.email };
+      const existingUser = await usersCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: "user already exists" });
+      }
       const result = await usersCollection.insertOne(user);
       res.send(result);
     });
@@ -125,7 +131,8 @@ async function run() {
       res.send(result);
     });
 
-    // cart collection apis
+    // cart collection APIs
+
     app.get("/carts", async (req, res) => {
       const email = req.query.email;
 
@@ -133,12 +140,12 @@ async function run() {
         res.send([]);
       }
 
-      const decodedEmail = req.decoded.email;
-      if (email !== decodedEmail) {
-        return res
-          .status(403)
-          .send({ error: true, message: "forbidden access" });
-      }
+      // const decodedEmail = req.decoded.email;
+      // if (email !== decodedEmail) {
+      //   return res
+      //     .status(403)
+      //     .send({ error: true, message: "forbidden access" });
+      // }
 
       const query = { email: email };
       const result = await cartCollection.find(query).toArray();

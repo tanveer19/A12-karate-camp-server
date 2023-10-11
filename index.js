@@ -106,18 +106,19 @@ async function run() {
 
     app.patch("/users/admin/:id", async (req, res) => {
       const id = req.params.id;
+      console.log(id);
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
           role: "admin",
         },
       };
-      const decodedEmail = req.decoded.email;
-      if (email !== decodedEmail) {
-        return res
-          .status(403)
-          .send({ error: true, message: "forbidden access" });
-      }
+      // const decodedEmail = req.decoded.email;
+      // if (email !== decodedEmail) {
+      //   return res
+      //     .status(403)
+      //     .send({ error: true, message: "forbidden access" });
+      // }
 
       const result = await usersCollection.updateOne(filter, updateDoc);
       res.send(result);

@@ -50,12 +50,8 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     client.connect();
 
-    const instructorCollection = client
-      .db("A12-karate-camp")
-      .collection("instructors");
-    const classesCollection = client
-      .db("A12-karate-camp")
-      .collection("classes");
+    const instructorCollection = client.db("A12-karate-camp").collection("instructors");
+    const classesCollection = client.db("A12-karate-camp").collection("classes");
     const usersCollection = client.db("A12-karate-camp").collection("users");
     const cartCollection = client.db("A12-karate-camp").collection("carts");
 
@@ -64,7 +60,7 @@ async function run() {
     app.post("/jwt", (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "24h",
+        expiresIn: "240h",
       });
 
       res.send({ token });
@@ -204,24 +200,27 @@ async function run() {
       "Pinged your deployment. You are successfully connected to MongoDB!"
     );
 
-    app.post("/postClasses", async (req, res) => {
-      const body = req.body;
-      const result = await classesCollection.insertOne(body);
+    // classes related apis
+
+    app.get("/classes", async (req, res) => {
+      const result = await classesCollection.find({}).toArray();
+      res.send(result);
+    });
+
+    app.post("/classes", async (req, res) => {
+      const newItem = req.body;
+      const result = await classesCollection.insertOne(newItem);
       console.log(result);
       res.send(result);
     });
 
-    app.delete("/allclasses/:id", async (req, res) => {
+    app.delete("/classes/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await classesCollection.deleteOne(query);
       res.send(result);
     });
 
-    app.get("/allclasses", async (req, res) => {
-      const result = await classesCollection.find({}).toArray();
-      res.send(result);
-    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();

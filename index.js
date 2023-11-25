@@ -50,14 +50,14 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     client.connect();
 
-    const instructorCollection = client
-      .db("A12-karate-camp")
-      .collection("instructors");
-    const classesCollection = client
-      .db("A12-karate-camp")
-      .collection("classes");
+    // prettier-ignore
+    const instructorCollection = client.db("A12-karate-camp").collection("instructors");
+    // prettier-ignore
+    const classesCollection = client.db("A12-karate-camp").collection("classes");
     const usersCollection = client.db("A12-karate-camp").collection("users");
     const cartCollection = client.db("A12-karate-camp").collection("carts");
+    // prettier-ignore
+    const paymentCollection = client.db("A12-karate-camp").collection("payments");
 
     // jwt token
 
@@ -193,9 +193,7 @@ async function run() {
     // create payment intent
     app.post("/create-payment-intent", verifyJWT, async (req, res) => {
       const { price } = req.body;
-
       const amount = price * 100;
-
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: "usd",
@@ -204,6 +202,13 @@ async function run() {
       res.send({
         clientSecret: paymentIntent.client_secret,
       });
+    });
+
+    // payment related api
+    app.post("/payments", verifyJWT, async (req, res) => {
+      const payment = req.body;
+      const result = await paymentCollection.insertOne(payment);
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection

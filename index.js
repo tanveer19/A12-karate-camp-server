@@ -212,14 +212,23 @@ async function run() {
         _id: { $in: payment.cartItems.map((id) => new ObjectId(id)) },
       };
       const deleteResult = await cartCollection.deleteMany(query);
-      // Combine the results into a single response object
-      // const response = {
-      //   insertResult,
-      //   deleteResult,
-      // };
 
-      // Send the response
       res.send({ insertResult, deleteResult });
+    });
+    // admin stats
+    app.get("/admin-stats", verifyJWT, verifyAdmin, async (req, res) => {
+      const users = await usersCollection.estimatedDocumentCount();
+      const products = await classesCollection.estimatedDocumentCount();
+      const orders = await paymentCollection.estimatedDocumentCount();
+      const payments = await paymentCollection.find().toArray();
+      const revenue = payments.reduce((sum, payment) => sum + payment.price, 0);
+
+      res.send({
+        revenue,
+        users,
+        products,
+        orders,
+      });
     });
 
     // Send a ping to confirm a successful connection

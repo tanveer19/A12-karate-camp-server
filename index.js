@@ -231,7 +231,44 @@ async function run() {
       });
     });
 
+    app.get("/order-stats", async (req, res) => {
+      const pipeline = [
+        {
+          $lookup: {
+            from: "classes",
+            localField: "classItems",
+            foreignField: "_id",
+            as: "classItemsData",
+          },
+        },
+        // {
+        //   $unwind: "$classItemsData",
+        // },
+        {
+          $group: {
+            _id: "$category",
+            count: { $sum: 1 },
+            totalPrice: { $sum: "$price" },
+          },
+        },
+      ];
+
+      const result = await paymentCollection.aggregate(pipeline).toArray();
+      console.log(result);
+      res.send(result);
+    });
+
+    // Bangla system (second best solution)
+    //   1. load all payments
+    //   2. for each payment, get classItems Array
+    //   3. for each item in the classItems array get classItems from classesCollection
+    //   4. put them in array: allOrderedItems
+    //   5. separate allOrderedItems by category using filter
+    //   6. get quantiy using length: japan.length
+    //   7. for each category use reduce to get total amount spent on this category
+
     // Send a ping to confirm a successful connection
+
     client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You are successfully connected to MongoDB!"

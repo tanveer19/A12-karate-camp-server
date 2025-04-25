@@ -193,7 +193,7 @@ async function run() {
     // create payment intent
     app.post("/create-payment-intent", verifyJWT, async (req, res) => {
       const { price } = req.body;
-      const amount = price * 100;
+      const amount = parseInt(price * 100);
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: "usd",
@@ -278,6 +278,33 @@ async function run() {
 
     app.get("/classes", async (req, res) => {
       const result = await classesCollection.find({}).toArray();
+      res.send(result);
+    });
+
+    app.get("/class/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await classesCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.patch("/class/:id", async (req, res) => {
+      const item = req.body;
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          name: item.name,
+          InstructorName: item.InstructorName,
+          InstructorEmail: item.InstructorEmail,
+          seats: item.seats,
+          price: item.price,
+          status: item.status,
+          category: item.category,
+          image: item.image,
+        },
+      };
+      const result = await classesCollection.updateOne(filter, updatedDoc);
       res.send(result);
     });
 
